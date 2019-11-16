@@ -1,0 +1,8 @@
+.gitignore
+.idea
+*.so
+*.egg
+*.egg-info
+dist
+build
+venv*/
