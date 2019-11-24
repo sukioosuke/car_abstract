@@ -20,8 +20,10 @@ if __name__ == '__main__':
     test_content['Dialogue'] = test_content['Dialogue'].apply(remove_pic_and_sound)
 
     v = Vocab
-    train_df = utils.parallelize(train_content, v.set_vocabulary)
-    test_df = utils.parallelize(test_content, v.set_vocabulary)
+    utils.parallelize(train_content, v)
+    utils.parallelize(test_content, v)
+    train_df = utils.parallelize(train_content, v.cut_words)
+    test_df = utils.parallelize(test_content, v.cut_words)
     file = open('../../output/vocabulary.csv', 'w')
     file.write('vocabulary\n')
     file.writelines(map(lambda x: x + '\n', list(v.vocabulary.keys())))
