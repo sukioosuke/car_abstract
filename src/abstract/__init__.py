@@ -1,7 +1,8 @@
 import pandas as pd
 
 from abstract.vocab import Vocab
-from abstract import utils
+from utils.paths import *
+from utils import words_utils
 
 
 def remove_pic_and_sound(line):
@@ -10,8 +11,8 @@ def remove_pic_and_sound(line):
 
 
 if __name__ == '__main__':
-    train_file = pd.read_csv('../../data/AutoMaster_TrainSet.csv', encoding='utf-8')
-    test_file = pd.read_csv('../../data/AutoMaster_TestSet.csv', encoding='utf-8')
+    train_file = pd.read_csv(train_data_path, encoding='utf-8')
+    test_file = pd.read_csv(test_data_path, encoding='utf-8')
 
     train_content = train_file.dropna().drop("QID", axis=1)
     test_content = test_file.dropna().drop("QID", axis=1)
@@ -19,12 +20,13 @@ if __name__ == '__main__':
     train_content['Dialogue'] = train_content['Dialogue'].apply(remove_pic_and_sound)
     test_content['Dialogue'] = test_content['Dialogue'].apply(remove_pic_and_sound)
 
-    v = Vocab
-    utils.parallelize(train_content, v)
-    utils.parallelize(test_content, v)
-    train_df = utils.parallelize(train_content, v.cut_words)
-    test_df = utils.parallelize(test_content, v.cut_words)
-    file = open('../../output/vocabulary.csv', 'w')
-    file.write('vocabulary\n')
-    file.writelines(map(lambda x: x + '\n', list(v.vocabulary.keys())))
-    file.close()
+    v = Vocab()
+    train_df = v.set_vocabulary(train_content)
+    test_df = v.set_vocabulary(test_content)
+    # train_df.to_csv(train_clean_path, index=None, header=False)
+    # test_df.to_csv(test_clean_path, index=None, header=False)
+    train_df['merged'] = train_df[['Question', 'Dialogue', 'Report']].apply(lambda x: ' '.join(x), axis=1)
+    test_df['merged'] = test_df[['Question', 'Dialogue']].apply(lambda x: ' '.join(x), axis=1)
+    merged_df = pd.concat([train_df[['merged']], test_df[['merged']]], axis=0)
+    merged_df.to_csv(merged_data_path, index=None, header=False)
+    words_utils.train_vec_model(merged_data_path, vector_path)
