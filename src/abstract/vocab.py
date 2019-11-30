@@ -60,7 +60,7 @@ class Vocab(object):
             df[col_name] = df[col_name].apply(self.filter_lessuse)
         return df
 
-    def set_vocabulary(self, dataframe, partitions=8):
+    def multi_set_vocabulary(self, dataframe, partitions=8):
         df = pd.DataFrame
         pool = Pool(partitions)
         data_split = np.array_split(dataframe, partitions)
@@ -72,9 +72,14 @@ class Vocab(object):
         pool.join()
         return data
 
+    def set_vocabulary(self, dataframe):
+        df = self.dataframe_cut(dataframe)
+        self.update_lessuse()
+        return self.dataframe_filter(df)
+
 
 if __name__ == '__main__':
     v = Vocab()
     train_file = pd.read_csv(train_data_path, encoding='utf-8')
-    v.set_vocabulary(train_file.head(24))
+    v.multi_set_vocabulary(train_file.head(24))
     print(v.vocabulary)
