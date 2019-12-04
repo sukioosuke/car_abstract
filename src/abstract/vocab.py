@@ -13,8 +13,11 @@ from utils.paths import *
 class Vocab:
     """get vocabulary in test and train data
     1. filter stopwords
-    2. filter punctuation
+    2. filter words which less occurrences in text
     3. generate words dictionary
+
+    @:param multi: multiple processes running
+    @:param package: choose which package to cut words(eg: jieba, pkuseg)
     """
     __manager = None
     __lock = None
@@ -38,6 +41,9 @@ class Vocab:
             self.multi = multi
         self.__package = package
 
+    """
+    Return words in sentence. Will replace punctuation with space.
+    """
     def cut_words(self, sentence):
         cut = []
         seg = None
@@ -68,6 +74,9 @@ class Vocab:
                     cut.append(j)
         return ' '.join(cut)
 
+    """
+    Set word dictionary with input dataframe. If init class with param multi which is True, then it will run in multiple processes. 
+    """
     def set_vocabulary(self, dataframe):
         if self.__multi:
             pool = Pool(self.__partition)
@@ -78,7 +87,6 @@ class Vocab:
             return data
         else:
             return self.dataframe_cut(dataframe)
-
 
     def filter_lessuse(self, sentence):
         return ' '.join(filter(lambda x: x != '' and x not in self.less_use, sentence.split(' ')))

@@ -32,6 +32,5 @@ if __name__ == '__main__':
     test_df['merged'] = test_df[['Question', 'Dialogue']].apply(lambda x: ' '.join(x), axis=1)
     merged_df = pd.concat([train_df[['merged']], test_df[['merged']]], axis=0)
     merged_df.to_csv(merged_data_path, index=None, header=False, sep=' ')
-    model = words_utils.train_vec_model(merged_data_path, vector_path)
-    vocab = {word: index for index, word in enumerate(model.wv.index2word)}
-    reverse_vocab = {index: word for index, word in enumerate(model.wv.index2word)}
+    model = words_utils.train_vec_model(merged_data_path, model_path)
+    words_utils.get_embedding(model, vector_path)
