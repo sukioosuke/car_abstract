@@ -2,6 +2,8 @@ import os
 import pathlib
 
 root = pathlib.Path(os.path.abspath(os.curdir)).parent.parent
+if root.name != 'car_abstract':
+    root = pathlib.Path(os.path.abspath(os.curdir)).parent
 
 train_data_path = os.path.join(root, 'data', 'AutoMaster_TrainSet.csv')
 test_data_path = os.path.join(root, 'data', 'AutoMaster_TestSet.csv')

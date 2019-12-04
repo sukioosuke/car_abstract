@@ -31,11 +31,11 @@ class Vocab:
         for i in file.readlines():
             self.stop_words.append(i.replace('\n', ''))
         if multi:
-            self.vocabulary = self.__manager.dict()
-            self.multi = multi
             self.__manager = Manager()
             self.__lock = self.__manager.Lock()
             self.__partition = cpu_count()
+            self.vocabulary = self.__manager.dict()
+            self.multi = multi
         self.__package = package
 
     def cut_words(self, sentence):
@@ -75,19 +75,13 @@ class Vocab:
             data = pd.concat(pool.map(self.dataframe_cut, data_split))
             pool.close()
             pool.join()
-            self.update_lessuse()
-            data_split = np.array_split(data, self.__partition)
-            data = pd.concat(pool.map(self.dataframe_filter, data_split))
-            pool.close()
-            pool.join()
             return data
         else:
-            df = self.dataframe_cut(dataframe)
-            self.update_lessuse()
-            return self.dataframe_filter(df)
+            return self.dataframe_cut(dataframe)
+
 
     def filter_lessuse(self, sentence):
-        ' '.join(filter(lambda x: x not in self.less_use, sentence.split(' ')))
+        return ' '.join(filter(lambda x: x != '' and x not in self.less_use, sentence.split(' ')))
 
     def update_lessuse(self):
         for word in self.vocabulary.keys():
@@ -107,8 +101,13 @@ class Vocab:
 
 
 if __name__ == '__main__':
-    v = Vocab()
     train_file = pd.read_csv(train_data_path, encoding='utf-8')
+    test_file = pd.read_csv(test_data_path, encoding='utf-8')
+
     train_content = train_file.dropna().drop("QID", axis=1)
-    v.set_vocabulary(train_file)
-    print(v.vocabulary)
+    test_content = test_file.dropna().drop("QID", axis=1)
+
+    v = Vocab()
+    # train_df = v.multi_set_vocabulary(train_content)
+    train_df = v.set_vocabulary(train_content.head(8))
+    train_df.to_csv(train_clean_path, index=None, header=False)

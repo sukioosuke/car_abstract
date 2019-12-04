@@ -11,6 +11,7 @@ def train_vec_model(path, model_path):
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     model = word2vec.Word2Vec(LineSentence(path), workers=8, min_count=5, size=250)
     model.save(model_path)
+    return model
 
 
 def load_vec_model(path):

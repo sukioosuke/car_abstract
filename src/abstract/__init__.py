@@ -22,13 +22,16 @@ if __name__ == '__main__':
 
     v = Vocab()
     # train_df = v.multi_set_vocabulary(train_content)
-    train_df = v.set_vocabulary(train_content)
-    train_df.to_csv(train_clean_path, index=None, header=False)
     # test_df = v.multi_set_vocabulary(test_content)
+    train_df = v.set_vocabulary(train_content)
     test_df = v.set_vocabulary(test_content)
-    test_df.to_csv(test_clean_path, index=None, header=False)
+    v.update_lessuse()
+    v.dataframe_filter(train_df).to_csv(train_clean_path, index=None, header=False)
+    v.dataframe_filter(test_df).to_csv(test_clean_path, index=None, header=False)
     train_df['merged'] = train_df[['Question', 'Dialogue', 'Report']].apply(lambda x: ' '.join(x), axis=1)
     test_df['merged'] = test_df[['Question', 'Dialogue']].apply(lambda x: ' '.join(x), axis=1)
     merged_df = pd.concat([train_df[['merged']], test_df[['merged']]], axis=0)
-    merged_df.to_csv(merged_data_path, index=None, header=False)
-    words_utils.train_vec_model(merged_data_path, vector_path)
+    merged_df.to_csv(merged_data_path, index=None, header=False, sep=' ')
+    model = words_utils.train_vec_model(merged_data_path, vector_path)
+    vocab = {word: index for index, word in enumerate(model.wv.index2word)}
+    reverse_vocab = {index: word for index, word in enumerate(model.wv.index2word)}
